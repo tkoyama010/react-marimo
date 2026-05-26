@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-library:
+    name: Typecheck and build library
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install, typecheck and build (skips if library source not present)
+        run: |
+          if [ ! -f package.json ]; then
+            echo "Library source not yet on this branch — skipping."
+            exit 0
+          fi
+          npm install
+          npm run typecheck
+          npm run build
+          test -f dist/index.esm.js
+          test -f dist/index.cjs.js
+          test -f dist/index.d.ts
+          echo "All dist artifacts present."
+
+  build-demo:
+    name: Typecheck and build demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install demo dependencies
+        working-directory: demo
+        run: npm install
+
+      - name: Typecheck demo
+        working-directory: demo
+        run: npm run typecheck
+
+      - name: Build demo
+        working-directory: demo
+        run: npm run build

@@ -1,0 +1,52 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build demo
+        if: github.event.action != 'closed'
+        working-directory: demo
+        run: npm install && npm run build
+
+      - name: Create empty dist for teardown
+        if: github.event.action == 'closed'
+        run: mkdir -p demo/dist
+
+      - name: Deploy to GitHub Pages (main branch)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: demo/dist
+          keep_files: true
+
+      - name: Deploy / teardown PR preview
+        if: github.event_name == 'pull_request'
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: demo/dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: auto
