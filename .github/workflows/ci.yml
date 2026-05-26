@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck-and-build:
+    name: Typecheck and build library
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build library
+        run: npm run build
+
+      - name: Verify dist artifacts
+        run: |
+          test -f dist/index.esm.js
+          test -f dist/index.cjs.js
+          test -f dist/index.d.ts
+          echo "All dist artifacts present"
+
+  typecheck-demo:
+    name: Typecheck demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install demo dependencies
+        working-directory: demo
+        run: npm install
+
+      - name: Typecheck demo
+        working-directory: demo
+        run: npm run typecheck
