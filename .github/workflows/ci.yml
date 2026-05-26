@@ -6,11 +6,9 @@ on:
   pull_request:
 
 jobs:
-  typecheck-and-build:
+  build-library:
     name: Typecheck and build library
     runs-on: ubuntu-latest
-    # Skip when the library source has not been added yet
-    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -18,23 +16,21 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Build library
-        run: npm run build
-
-      - name: Verify dist artifacts
+      - name: Install, typecheck and build (skips if library source not present)
         run: |
+          if [ ! -f package.json ]; then
+            echo "Library source not yet on this branch — skipping."
+            exit 0
+          fi
+          npm install
+          npm run typecheck
+          npm run build
           test -f dist/index.esm.js
           test -f dist/index.cjs.js
           test -f dist/index.d.ts
-          echo "All dist artifacts present"
+          echo "All dist artifacts present."
 
-  typecheck-demo:
+  build-demo:
     name: Typecheck and build demo
     runs-on: ubuntu-latest
     steps:
