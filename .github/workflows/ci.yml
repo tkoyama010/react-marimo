@@ -9,6 +9,8 @@ jobs:
   typecheck-and-build:
     name: Typecheck and build library
     runs-on: ubuntu-latest
+    # Skip when the library source has not been added yet
+    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +35,7 @@ jobs:
           echo "All dist artifacts present"
 
   typecheck-demo:
-    name: Typecheck demo
+    name: Typecheck and build demo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,3 +51,7 @@ jobs:
       - name: Typecheck demo
         working-directory: demo
         run: npm run typecheck
+
+      - name: Build demo
+        working-directory: demo
+        run: npm run build

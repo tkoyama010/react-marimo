@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MarimoEmbed } from 'react-marimo'
+import { MarimoEmbed } from './MarimoEmbed'
 
 // Demonstrates: inline code, showCode toggle, mode toggle
 const EXAMPLE_CODE = `import marimo
